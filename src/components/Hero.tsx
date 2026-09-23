@@ -1,12 +1,13 @@
 import React from 'react';
 import { Scissors, Phone, MessageSquare, Star, MapPin, Calendar, Clock, CheckCircle2, Award } from 'lucide-react';
-import { SHOP_INFO } from '../data/barberData';
+import { SHOP_INFO, getTodayStatus } from '../data/barberData';
 
 interface HeroProps {
   onBookNow: () => void;
 }
 
 export const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
+  const todayStatus = getTodayStatus();
   return (
     <section className="relative overflow-hidden pt-6 pb-16 lg:py-20 bg-neutral-950 border-b border-neutral-850">
       {/* Subtle background ambient gradients */}
@@ -147,8 +148,8 @@ export const Hero: React.FC<HeroProps> = ({ onBookNow }) => {
 
                 <div className="flex items-center justify-between pt-2 border-t border-neutral-800 text-xs text-neutral-400">
                   <span className="flex items-center gap-1">
-                    <Clock className="w-3.5 h-3.5 text-amber-500" />
-                    مفتوح اليوم: 10:00 – 21:00
+                    <Clock className={`w-3.5 h-3.5 ${todayStatus.isOpenToday ? 'text-amber-500' : 'text-rose-400'}`} />
+                    <span>{todayStatus.badgeText}</span>
                   </span>
                   <button
                     onClick={onBookNow}

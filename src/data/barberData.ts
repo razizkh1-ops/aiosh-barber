@@ -19,13 +19,38 @@ export const SHOP_INFO: ShopInfo = {
   phoneRaw: '972549898923',
   whatsappUrl: 'https://wa.me/972549898923',
   hours: [
-    { days: 'الأحد – الخميس', hours: '10:00 – 21:00' },
-    { days: 'الجمعة', hours: '09:00 – 18:00' },
-    { days: 'السبت', hours: '10:00 – 21:00' },
+    { days: 'الأحد', hours: '12:00 – 21:00' },
+    { days: 'الإثنين – الخميس', hours: '14:00 – 21:00' },
+    { days: 'الجمعة', hours: '12:00 – 21:00' },
+    { days: 'السبت', hours: 'مغلق (عطلة أسبوعية)' },
   ],
   googleMapsQuery: 'https://maps.google.com/?q=32.871333,35.291333',
   wazeQuery: 'https://waze.com/ul?ll=32.871333,35.291333&navigate=yes',
 };
+
+export function getTodayStatus(): { isOpenToday: boolean; badgeText: string; hoursText: string } {
+  const now = new Date();
+  const day = now.getDay(); // 0 = Sun, 1 = Mon, ... 5 = Fri, 6 = Sat
+  if (day === 6) {
+    return {
+      isOpenToday: false,
+      badgeText: 'السبت: مغلق (عطلة أسبوعية)',
+      hoursText: 'مغلق اليوم',
+    };
+  }
+  if (day === 0 || day === 5) {
+    return {
+      isOpenToday: true,
+      badgeText: 'مفتوح اليوم: 12:00 – 21:00',
+      hoursText: '12:00 – 21:00',
+    };
+  }
+  return {
+    isOpenToday: true,
+    badgeText: 'مفتوح اليوم: 14:00 – 21:00',
+    hoursText: '14:00 – 21:00',
+  };
+}
 
 export const SERVICES_LIST: BarberService[] = [
   {

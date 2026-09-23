@@ -46,7 +46,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
   // Client Info
   const [customerName, setCustomerName] = useState<string>('');
   const [customerPhone, setCustomerPhone] = useState<string>('+972 ');
-  const [customerEmail, setCustomerEmail] = useState<string>('');
   const [notes, setNotes] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState<string>('');
 
@@ -61,9 +60,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
     if (user) {
       if (user.displayName && !customerName) {
         setCustomerName(user.displayName);
-      }
-      if (user.email && !customerEmail) {
-        setCustomerEmail(user.email);
       }
     }
   }, [user]);
@@ -95,10 +91,14 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
     const d = new Date();
     d.setDate(d.getDate() + i);
     const iso = d.toISOString().split('T')[0];
+    const isSaturday = d.getDay() === 6;
     const dayName = i === 0 ? 'اليوم' : i === 1 ? 'غداً' : arabicDays[d.getDay()];
     const dayNum = `${d.getDate()}/${d.getMonth() + 1}`;
-    return { iso, dayName, dayNum };
+    return { iso, dayName, dayNum, isSaturday };
   });
+
+  const [sY, sM, sD] = selectedDate.split('-').map(Number);
+  const isSelectedSaturday = new Date(sY, sM - 1, sD).getDay() === 6;
 
   const handleConfirmBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +134,7 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
       time: selectedTime,
       customerName: customerName.trim(),
       customerPhone: customerPhone.trim(),
-      customerEmail: customerEmail.trim() || undefined,
+      customerEmail: user?.email || undefined,
       notes: notes.trim() || undefined,
       status: 'confirmed' as const,
     };
@@ -350,13 +350,24 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                       className={`p-2.5 rounded-xl border text-center transition-all cursor-pointer flex flex-col items-center justify-center ${
                         isSelected
                           ? 'bg-amber-500 text-neutral-950 border-amber-400 font-bold shadow-md shadow-amber-500/30'
+                          : d.isSaturday
+                          ? 'bg-neutral-950/40 border-neutral-850 text-neutral-500 hover:border-neutral-800'
                           : 'bg-neutral-950/70 border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:bg-neutral-850'
                       }`}
                     >
-                      <span className={`text-[11px] font-semibold ${isSelected ? 'text-neutral-950' : 'text-amber-400'}`}>
+                      <span className={`text-[11px] font-semibold ${
+                        isSelected ? 'text-neutral-950' : d.isSaturday ? 'text-neutral-400' : 'text-amber-400'
+                      }`}>
                         {d.dayName}
                       </span>
                       <span className="text-xs mt-0.5" dir="ltr">{d.dayNum}</span>
+                      {d.isSaturday && (
+                        <span className={`text-[9px] px-1 rounded font-bold mt-0.5 ${
+                          isSelected ? 'bg-neutral-950 text-amber-400' : 'bg-rose-500/15 text-rose-400'
+                        }`}>
+                          مغلق
+                        </span>
+                      )}
                     </button>
                   );
                 })}
@@ -373,7 +384,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                 <div className="flex gap-1 text-[11px]">
                   {[
                     { id: 'all', label: 'الكل' },
-                    { id: 'morning', label: 'صباحاً' },
                     { id: 'afternoon', label: 'ظهراً' },
                     { id: 'evening', label: 'مساءً' }
                   ].map((p) => (
@@ -395,7 +405,17 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
 
               {/* Time Slots Grid */}
               <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2.5 max-h-60 overflow-y-auto pr-1">
-                {filteredSlots.length === 0 ? (
+                {isSelectedSaturday ? (
+                  <div className="col-span-full py-8 px-4 text-center rounded-xl bg-neutral-900/60 border border-neutral-800 space-y-2">
+                    <div className="w-10 h-10 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400 flex items-center justify-center mx-auto">
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <div className="text-sm font-bold text-neutral-200">الصالون مغلق يوم السبت (عطلة أسبوعية)</div>
+                    <p className="text-xs text-neutral-400 max-w-sm mx-auto">
+                      يسعدنا استقبالكم الأحد والجمعة (12:00 – 21:00) والإثنين إلى الخميس (14:00 – 21:00). يرجى اختيار يوم آخر للحجز.
+                    </p>
+                  </div>
+                ) : filteredSlots.length === 0 ? (
                   <div className="col-span-full py-8 text-center text-neutral-500 text-sm">
                     لا توجد أدوار متاحة في هذه الفترة. يرجى اختيار تاريخ أو فترة أخرى.
                   </div>
@@ -533,21 +553,6 @@ export const BookingWizard: React.FC<BookingWizardProps> = ({
                   className="w-full px-3.5 py-2.5 rounded-lg bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-neutral-100 text-sm placeholder:text-neutral-600 outline-none"
                 />
               </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-neutral-300">
-                البريد الإلكتروني (اختياري)
-              </label>
-              <input
-                id="input-customer-email"
-                type="email"
-                placeholder="name@example.com"
-                dir="ltr"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-lg bg-neutral-950 border border-neutral-800 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 text-neutral-100 text-sm placeholder:text-neutral-600 outline-none"
-              />
             </div>
 
             <div className="space-y-1.5">

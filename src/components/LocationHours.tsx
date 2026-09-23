@@ -95,15 +95,24 @@ export const LocationHours: React.FC<LocationHoursProps> = ({ onBookNow }) => {
               </h3>
 
               <div className="space-y-2.5">
-                {SHOP_INFO.hours.map((h, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center justify-between py-2 px-3 rounded-lg bg-neutral-950 border border-neutral-850 text-xs sm:text-sm"
-                  >
-                    <span className="font-medium text-neutral-300">{h.days}</span>
-                    <span className="font-bold text-amber-400" dir="ltr">{h.hours}</span>
-                  </div>
-                ))}
+                {SHOP_INFO.hours.map((h, i) => {
+                  const isClosed = h.hours.includes('مغلق');
+                  return (
+                    <div
+                      key={i}
+                      className={`flex items-center justify-between py-2.5 px-3 rounded-lg border text-xs sm:text-sm ${
+                        isClosed
+                          ? 'bg-rose-950/20 border-rose-900/30'
+                          : 'bg-neutral-950 border-neutral-850'
+                      }`}
+                    >
+                      <span className={`font-medium ${isClosed ? 'text-neutral-400' : 'text-neutral-300'}`}>{h.days}</span>
+                      <span className={`font-bold ${isClosed ? 'text-rose-400 font-semibold' : 'text-amber-400'}`} dir={isClosed ? 'rtl' : 'ltr'}>
+                        {h.hours}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="pt-2 flex items-center gap-2 text-xs text-neutral-400">

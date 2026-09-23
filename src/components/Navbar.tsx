@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Phone, MessageSquare, Calendar, Clock, Menu, X, Scissors, UserCheck, ShieldCheck, LogIn, LogOut, User } from 'lucide-react';
-import { SHOP_INFO } from '../data/barberData';
+import { SHOP_INFO, getTodayStatus } from '../data/barberData';
 import { useAuth } from '../context/AuthContext';
 
 interface NavbarProps {
@@ -18,6 +18,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, isAdmin, loginWithGoogle, logout } = useAuth();
+  const todayStatus = getTodayStatus();
 
   const scrollTo = (id: string) => {
     setMobileMenuOpen(false);
@@ -34,12 +35,12 @@ export const Navbar: React.FC<NavbarProps> = ({
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-4">
             <span className="flex items-center gap-1.5 text-neutral-300 font-medium">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span className={`w-2 h-2 rounded-full ${todayStatus.isOpenToday ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`}></span>
               سخنين، شارع مغارة العشرة
             </span>
             <span className="hidden md:inline-flex items-center gap-1 text-neutral-400">
-              <Clock className="w-3.5 h-3.5 text-amber-500" />
-              مفتوح اليوم: 10:00 – 21:00
+              <Clock className={`w-3.5 h-3.5 ${todayStatus.isOpenToday ? 'text-amber-500' : 'text-rose-400'}`} />
+              {todayStatus.badgeText}
             </span>
           </div>
 

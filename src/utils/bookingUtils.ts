@@ -106,28 +106,39 @@ export function deleteBooking(id: string): AppointmentBooking[] {
   return updated;
 }
 
-// Generate slots from 10:00 to 20:30 (every 30 mins)
+// Generate slots based on operating hours:
+// - Sunday & Friday: 12:00 to 21:00
+// - Monday to Thursday: 14:00 to 21:00
+// - Saturday: Closed
 export function generateDaySlots(dateStr: string, barberId: string): TimeSlot[] {
   const allBookings = getStoredBookings();
-  const selectedDate = new Date(dateStr);
-  const dayOfWeek = selectedDate.getDay(); // 0 is Sunday, 5 is Friday
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const selectedDate = new Date(y, m - 1, d);
+  const dayOfWeek = selectedDate.getDay(); // 0 is Sunday, 5 is Friday, 6 is Saturday
 
-  // Opening hours: Friday 09:00 - 18:00, other days 10:00 - 21:00
-  const startHour = dayOfWeek === 5 ? 9 : 10;
-  const endHour = dayOfWeek === 5 ? 18 : 21;
+  // Saturday is closed
+  if (dayOfWeek === 6) {
+    return [];
+  }
+
+  // Sunday & Friday: 12:00 - 21:00
+  // Monday to Thursday: 14:00 - 21:00
+  const startHour = (dayOfWeek === 0 || dayOfWeek === 5) ? 12 : 14;
+  const endHour = 21;
 
   const slots: TimeSlot[] = [];
 
-  for (let h = startHour; h < endHour; h++) {
-    for (const m of [0, 30]) {
-      // Don't go past closing
-      if (h === endHour - 1 && m === 30 && dayOfWeek === 5) continue;
+  for (let h = startHour; h <= endHour; h++) {
+    for (const min of [0, 30]) {
+      // Include up to 21:00 sharp
+      if (h === endHour && min > 0) continue;
 
-      const timeStr = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+      const timeStr = `${h.toString().padStart(2, '0')}:${min.toString().padStart(2, '0')}`;
       
-      let period: 'morning' | 'afternoon' | 'evening' = 'morning';
-      if (h >= 12 && h < 17) period = 'afternoon';
-      else if (h >= 17) period = 'evening';
+      let period: 'morning' | 'afternoon' | 'evening' = 'afternoon';
+      if (h < 12) period = 'morning';
+      else if (h >= 12 && h < 17) period = 'afternoon';
+      else period = 'evening';
 
       // Check if slot is taken on this date for this barber
       const isTaken = allBookings.some(b => {
@@ -144,7 +155,7 @@ export function generateDaySlots(dateStr: string, barberId: string): TimeSlot[] 
       let isPast = false;
       if (dateStr === todayStr) {
         const [currH, currM] = [now.getHours(), now.getMinutes()];
-        if (h < currH || (h === currH && m <= currM)) {
+        if (h < currH || (h === currH && min <= currM)) {
           isPast = true;
         }
       }

@@ -81,7 +81,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li className="flex items-center gap-2">
                 <Clock className="w-4 h-4 text-amber-500 shrink-0" />
-                <span>الأحد–الخميس والسبت: 10:00–21:00 | الجمعة: 09:00–18:00</span>
+                <span>الأحد والجمعة: 12:00–21:00 | الإثنين–الخميس: 14:00–21:00 | السبت: مغلق</span>
               </li>
             </ul>
           </div>
