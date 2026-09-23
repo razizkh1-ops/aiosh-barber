@@ -1,0 +1,6 @@
+{
+  "name": "AIOSH BARBER - صالون عيوش",
+  "description": "AIOSH BARBER - صالون عيوش في سخنين، شارع مغارة العشرة، حجز مواعيد أونلاين، قصات شعر وسكن فيد وتحديد لحية في سخنين، إسرائيل.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
